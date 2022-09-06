@@ -4,7 +4,6 @@ from .models import (Tags, Recipe,
                      Favorite, Ingredients)
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
-from django.shortcuts import get_object_or_404
 from users.serializers import CurrentUserProfileSerializer
 
 User = get_user_model()
@@ -92,11 +91,12 @@ class RecipePostSerializer(serializers.ModelSerializer):
         ingredients = instance.ingredients.all()
         amount = instance.recipeingredients.all()
         amount_list = []
-        for i in range(len(ingredients)):
+        print(ingredients)
+        for i, ingredient in enumerate(ingredients):
             i = {
-                'id': ingredients[i].id,
-                'name': ingredients[i].name,
-                'measurement_unit': ingredients[i].measurement_unit,
+                'id': ingredient.id,
+                'name': ingredient.name,
+                'measurement_unit': ingredient.measurement_unit,
                 'amount': amount[i].amount
                 }
             amount_list.append(i)

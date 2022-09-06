@@ -38,28 +38,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = CustomFilter
 
-    #def perform_create(self, serializer):
-    #    author = self.request.user
-    #    return serializer.save(author=author)
-
     def perform_update(self, serializer):
         author = self.request.user
         return serializer.save(author=author)
 
     def create(self, request, *args, **kwargs):
         author = self.request.user  # Soulafein87
-        serializer = RecipePostSerializer(data=request.data)   # {'name': 'utka15', 'image': 'data:image/png;base64,iVBORw0KGgoAAAANRU5ErkJggg==', 'text': 'text', 'tags': [3], 'ingredients': [{'id': 1, 'amount': 31}], 'cooking_time': 2}
+        serializer = RecipePostSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             tags = serializer.validated_data.pop('tags')
-            ingredients_all = serializer.validated_data.pop('recipeingredients')
-            recipe = Recipe.objects.create(author=author, **serializer.validated_data)
+            ingredients_all = serializer.validated_data.pop(
+                'recipeingredients')
+            recipe = Recipe.objects.create(
+                author=author, **serializer.validated_data)
             for value in tags:
                 tags_id = value.id
                 recipe.tags.add(get_object_or_404(Tags, pk=tags_id))
             for value in ingredients_all:
-                RecipeIngredients.objects.create(ingredients=Ingredients.objects.get(id=value['ingredients'].get('id')), amount=value.get('amount'), recipe_id=recipe.id).save()          # [OrderedDict([('ingredients', {'id': 1}), ('amount', 31)])]
-                rec_ingrid = RecipeIngredients.objects.get(ingredients=Ingredients.objects.get(id=value['ingredients'].get('id')), amount=value.get('amount'), recipe_id=recipe.id)
-                ingredients = Ingredients.objects.get(id=value['ingredients'].get('id'))
+                RecipeIngredients.objects.create(
+                    ingredients=Ingredients.objects.get(
+                        id=value['ingredients'].get('id')), amount=value.get(
+                            'amount'), recipe_id=recipe.id).save()
+                rec_ingrid = RecipeIngredients.objects.get(
+                    ingredients=Ingredients.objects.get(
+                        id=value['ingredients'].get('id')), amount=value.get(
+                            'amount'), recipe_id=recipe.id)
+                ingredients = Ingredients.objects.get(
+                    id=value['ingredients'].get('id'))
                 recipe.ingredients.add(ingredients)
                 recipe.recipeingredients.add(rec_ingrid)
                 serializer = RecipePostSerializer(instance=recipe)
@@ -67,16 +72,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, pk=None):
         instance = get_object_or_404(Recipe, pk=pk)
-        serializer = RecipePostSerializer(instance, data=request.data, partial=True)
+        serializer = RecipePostSerializer(
+            instance, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             instance.id = serializer.validated_data.get('id', instance.id)
             tags = serializer.validated_data.pop('tags')
             instance.tags.clear()
             ingredients = serializer.validated_data.pop('recipeingredients')
             instance.name = serializer.validated_data.get('name', instance.id)
-            instance.image = serializer.validated_data.pop('image', instance.id)
+            instance.image = serializer.validated_data.pop(
+                'image', instance.id)
             instance.text = serializer.validated_data.get('text', instance.id)
-            instance.cooking_time = serializer.validated_data.get('cooking_time', instance.id)
+            instance.cooking_time = serializer.validated_data.get(
+                'cooking_time', instance.id)
             RecipeIngredients.objects.filter(recipe=instance).delete()
             for value in tags:
                 tags_id = value.id
@@ -89,7 +97,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 ingredients = Ingredients.objects.get(
                     id=value['ingredients'].get('id'))
                 instance.ingredients.add(ingredients)
-            instance.image.add('image')
             serializer = RecipePostSerializer(instance)
             return Response(serializer.data, status=HTTPStatus.CREATED)
 
@@ -216,12 +223,14 @@ class ShoppingCartLoadlist(APIView):
                         shopp_voc[name]["amount"] = (
                             shopp_voc[name]["amount"] + amount)
                     else:
-                        shopp_voc[name] = {'measurement_unit': measurement_unit,
-                                        'amount': amount}
+                        shopp_voc[name] = {
+                            'measurement_unit': measurement_unit,
+                            'amount': amount
+                            }
             shopping_list = list()
             for value in shopp_voc:
                 shopping_list.append(f'{value}-{shopp_voc[value]["amount"]}'
-                                    f'{shopp_voc[value]["measurement_unit"]} \n')
+                                     f'{shopp_voc[value]["measurement_unit"]} \n')
 
             response = HttpResponse(shopping_list,
                                     'Content-Type: text/plain; charset=utf-8')
