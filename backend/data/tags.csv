@@ -1,9 +1,9 @@
-завтрак,#123456,breakfast
-обед,#333333,dinner
+завтрак,#FF0000,breakfast
+обед,#00FF00,dinner
 ужин,#888888,supper
-коктейль,#777777,cocktail
-аперитив,#666666,aperitif
-дижестив,#222222,digestif
-перекус,#999999,snack
-детское,#567834,children
-диетическое,#987643,dietary
+коктейль,#0000FF,cocktail
+аперитив,#FFFF00,aperitif
+дижестив,#00FFFF,digestif
+перекус,#94D92F,snack
+детское,#39C6AD,children
+диетическое,#CF6430,dietary

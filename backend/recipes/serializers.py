@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from recipes.models import (Tags, Recipe,
-                            RecipeIngredients, ShoppingCart,
-                            Favorite, Ingredients)
+from .models import (Tags, Recipe,
+                     RecipeIngredients, ShoppingCart,
+                     Favorite, Ingredients)
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
@@ -77,52 +77,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
                     'Вы уже добавили этот ингридиент')
             ingredients_in_recipe.append(get_ingredient_to_check)
         return attrs
-
-    def create(self, validated_data):
-        ingredients = validated_data.pop('recipeingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        for value in tags:
-            tags_id = value.id
-            recipe.tags.add(get_object_or_404(Tags, pk=tags_id))
-        for value in ingredients:
-            RecipeIngredients.objects.create(
-                ingredients=Ingredients.objects.get(
-                    id=value['ingredients'].get('id')), amount=value.get(
-                        'amount'), recipe_id=recipe.id).save()
-            rec_ingrid = RecipeIngredients.objects.get(
-                ingredients=Ingredients.objects.get(
-                    id=value['ingredients'].get('id')), amount=value.get(
-                        'amount'), recipe_id=recipe.id)
-            ingredients = Ingredients.objects.get(id=value['ingredients'].get(
-                'id'))
-            recipe.ingredients.add(ingredients)
-            recipe.recipeingredients.add(rec_ingrid)
-        return recipe
-
-    def update(self, instance, validated_data):
-        instance.id = validated_data.get('id', instance.id)
-        tags = validated_data.pop('tags')
-        instance.tags.clear()
-        ingredients = validated_data.pop('recipeingredients')
-        instance.name = validated_data.get('name', instance.id)
-        instance.image = validated_data.get('image', instance.id)
-        instance.text = validated_data.get('text', instance.id)
-        instance.cooking_time = validated_data.get('cooking_time', instance.id)
-        RecipeIngredients.objects.filter(recipe=instance).delete()
-        for value in tags:
-            tags_id = value.id
-            instance.tags.add(get_object_or_404(Tags, pk=tags_id))
-        for value in ingredients:
-            RecipeIngredients.objects.create(
-                ingredients=Ingredients.objects.get(
-                    id=value['ingredients'].get('id')), amount=value.get(
-                        'amount'), recipe_id=instance.id).save()
-            ingredients = Ingredients.objects.get(
-                id=value['ingredients'].get('id'))
-            instance.ingredients.add(ingredients)
-        instance.save()
-        return instance
 
     def to_representation(self, instance):
         tags = instance.tags.all()
