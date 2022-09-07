@@ -46,8 +46,7 @@ class UserProfileSerializer(UserSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        return Subscribes.objects.filter(
-                                         user=request.user,
+        return Subscribes.objects.filter(user=request.user,
                                          following=obj.id).exists()
 
 
@@ -70,6 +69,5 @@ class CurrentUserProfileSerializer(UserSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        return Subscribes.objects.filter(
-                                         user=request.user,
+        return Subscribes.objects.filter(user=request.user,
                                          following=obj.id).exists()
