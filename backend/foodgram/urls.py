@@ -6,4 +6,3 @@ urlpatterns = [
     path('api/', include('recipes.urls')),
     path('api/', include('users.urls')),
 ]
-
