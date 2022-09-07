@@ -19,7 +19,6 @@ from .serializers import (IngredientsSerializer, RecipePostSerializer,
                           ShoppingCartAndFavouriteSerializer,
                           SubscribeSerializer, TagsSerializer)
 
-
 User = get_user_model()
 
 
@@ -39,12 +38,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = CustomFilter
 
+    def perform_create(self, serializer):
+        author = self.request.user
+        return serializer.save(author=author)
+
     def perform_update(self, serializer):
         author = self.request.user
         return serializer.save(author=author)
 
     def create(self, request, *args, **kwargs):
-        author = self.request.user  # Soulafein87
+        author = self.request.user
         serializer = RecipePostSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             tags = serializer.validated_data.pop('tags')
@@ -211,7 +214,7 @@ class ShoppingCartLoadlist(APIView):
     def get(self, request, format=None):
         user = self.request.user
         shopping_cart = user.shoppingcart.all()
-        shopp_voc = {}
+        s_voc = {}
         for value in shopping_cart:
             recipe = value.recipe
             ingreds = RecipeIngredients.objects.filter(recipe=recipe)
@@ -220,20 +223,20 @@ class ShoppingCartLoadlist(APIView):
                     amount = ing.amount
                     name = ing.ingredients.name
                     measurement_unit = ing.ingredients.measurement_unit
-                    if name in shopp_voc:
-                        shopp_voc[name]["amount"] = (
-                            shopp_voc[name]["amount"] + amount)
+                    if name in s_voc:
+                        s_voc[name]["amount"] = (
+                            s_voc[name]["amount"] + amount)
                     else:
-                        shopp_voc[name] = {
+                        s_voc[name] = {
                             'measurement_unit': measurement_unit,
                             'amount': amount
                             }
             shopping_list = list()
-            for value in shopp_voc:
-                shopping_list.append(f'{value}-{shopp_voc[value]["amount"]}'
-                                     f'{shopp_voc[value]["measurement_unit"]} \n')
+            for value in s_voc:
+                shopping_list.append(f'{value}-{s_voc[value]["amount"]}'
+                                     f'{s_voc[value]["measurement_unit"]} \n')
 
             response = HttpResponse(shopping_list,
                                     'Content-Type: text/plain; charset=utf-8')
-            response['Content-Disposition'] = 'attachment; filename="wishlist.txt"'
+            response['Content-Disposition'] = 'attachment; filename="wish.txt"'
         return response
