@@ -26,9 +26,6 @@ jobs:
           pip install -r requirements.txt
       - name: Test with flake8
         run: python -m flake8
-      
-      - name: Test with Pytest
-        run: python -m pytest
           
   build_and_push_to_docker_hub:
       name: Push Docker image to Docker Hub
