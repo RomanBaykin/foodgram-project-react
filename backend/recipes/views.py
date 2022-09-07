@@ -49,60 +49,60 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         author = self.request.user
         serializer = RecipePostSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            tags = serializer.validated_data.pop('tags')
-            ingredients_all = serializer.validated_data.pop(
-                'recipeingredients')
-            recipe = Recipe.objects.create(
-                author=author, **serializer.validated_data)
-            for value in tags:
-                tags_id = value.id
-                recipe.tags.add(get_object_or_404(Tags, pk=tags_id))
-            for value in ingredients_all:
-                RecipeIngredients.objects.create(
-                    ingredients=Ingredients.objects.get(
-                        id=value['ingredients'].get('id')), amount=value.get(
-                            'amount'), recipe_id=recipe.id).save()
-                rec_ingrid = RecipeIngredients.objects.get(
-                    ingredients=Ingredients.objects.get(
-                        id=value['ingredients'].get('id')), amount=value.get(
-                            'amount'), recipe_id=recipe.id)
-                ingredients = Ingredients.objects.get(
-                    id=value['ingredients'].get('id'))
-                recipe.ingredients.add(ingredients)
-                recipe.recipeingredients.add(rec_ingrid)
-                serializer = RecipePostSerializer(instance=recipe)
-            return Response(serializer.data, status=HTTPStatus.CREATED)
+        serializer.is_valid(raise_exception=True)
+        tags = serializer.validated_data.pop('tags')
+        ingredients_all = serializer.validated_data.pop(
+            'recipeingredients')
+        recipe = Recipe.objects.create(
+            author=author, **serializer.validated_data)
+        for value in tags:
+            tags_id = value.id
+            recipe.tags.add(get_object_or_404(Tags, pk=tags_id))
+        for value in ingredients_all:
+            RecipeIngredients.objects.create(
+                ingredients=Ingredients.objects.get(
+                    id=value['ingredients'].get('id')), amount=value.get(
+                        'amount'), recipe_id=recipe.id).save()
+            rec_ingrid = RecipeIngredients.objects.get(
+                ingredients=Ingredients.objects.get(
+                    id=value['ingredients'].get('id')), amount=value.get(
+                        'amount'), recipe_id=recipe.id)
+            ingredients = Ingredients.objects.get(
+                id=value['ingredients'].get('id'))
+            recipe.ingredients.add(ingredients)
+            recipe.recipeingredients.add(rec_ingrid)
+            serializer = RecipePostSerializer(instance=recipe)
+        return Response(serializer.data, status=HTTPStatus.CREATED)
 
     def partial_update(self, request, pk=None):
         instance = get_object_or_404(Recipe, pk=pk)
         serializer = RecipePostSerializer(
             instance, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            instance.id = serializer.validated_data.get('id', instance.id)
-            tags = serializer.validated_data.pop('tags')
-            instance.tags.clear()
-            ingredients = serializer.validated_data.pop('recipeingredients')
-            instance.name = serializer.validated_data.get('name', instance.id)
-            instance.image = serializer.validated_data.pop(
-                'image', instance.id)
-            instance.text = serializer.validated_data.get('text', instance.id)
-            instance.cooking_time = serializer.validated_data.get(
-                'cooking_time', instance.id)
-            RecipeIngredients.objects.filter(recipe=instance).delete()
-            for value in tags:
-                tags_id = value.id
-                instance.tags.add(get_object_or_404(Tags, pk=tags_id))
-            for value in ingredients:
-                RecipeIngredients.objects.create(
-                    ingredients=Ingredients.objects.get(
-                        id=value['ingredients'].get('id')), amount=value.get(
-                            'amount'), recipe_id=instance.id).save()
-                ingredients = Ingredients.objects.get(
-                    id=value['ingredients'].get('id'))
-                instance.ingredients.add(ingredients)
-            serializer = RecipePostSerializer(instance)
-            return Response(serializer.data, status=HTTPStatus.CREATED)
+        serializer.is_valid(raise_exception=True)
+        instance.id = serializer.validated_data.get('id', instance.id)
+        tags = serializer.validated_data.pop('tags')
+        instance.tags.clear()
+        ingredients = serializer.validated_data.pop('recipeingredients')
+        instance.name = serializer.validated_data.get('name', instance.id)
+        instance.image = serializer.validated_data.pop(
+            'image', instance.id)
+        instance.text = serializer.validated_data.get('text', instance.id)
+        instance.cooking_time = serializer.validated_data.get(
+            'cooking_time', instance.id)
+        RecipeIngredients.objects.filter(recipe=instance).delete()
+        for value in tags:
+            tags_id = value.id
+            instance.tags.add(get_object_or_404(Tags, pk=tags_id))
+        for value in ingredients:
+            RecipeIngredients.objects.create(
+                ingredients=Ingredients.objects.get(
+                    id=value['ingredients'].get('id')), amount=value.get(
+                        'amount'), recipe_id=instance.id).save()
+            ingredients = Ingredients.objects.get(
+                id=value['ingredients'].get('id'))
+            instance.ingredients.add(ingredients)
+        serializer = RecipePostSerializer(instance)
+        return Response(serializer.data, status=HTTPStatus.CREATED)
 
 
 class IngredientsGetList(viewsets.ReadOnlyModelViewSet):
@@ -129,8 +129,7 @@ class SubscribesViewSet(viewsets.ModelViewSet):
         if request.user == user:
             msg = 'Нельзя подписываться на себя'
             return Response(msg, status=HTTPStatus.BAD_REQUEST)
-        if Subscribes.objects.filter(
-                                     user=request.user,
+        if Subscribes.objects.filter(user=request.user,
                                      following=user).exists():
             msg = 'Подписка уже существует'
             return Response(msg, status=HTTPStatus.BAD_REQUEST)
@@ -142,8 +141,7 @@ class SubscribesViewSet(viewsets.ModelViewSet):
     def delete(self, request, *args, **kwargs):
         author_id = self.kwargs['id']
         id = request.user.id
-        if not Subscribes.objects.filter(
-                                         user_id=id,
+        if not Subscribes.objects.filter(user_id=id,
                                          following_id=author_id).exists():
             msg = 'Такой подписки не существует'
             return Response(msg, HTTPStatus.NOT_FOUND)
@@ -161,9 +159,8 @@ class FavouriteViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     def create(self, request, *args, **kwargs):
         id = self.kwargs.get('id')
         get_recipe = get_object_or_404(Recipe, id=id)
-        if Favorite.objects.filter(
-                                    user=request.user,
-                                    recipe=get_recipe).exists():
+        if Favorite.objects.filter(user=request.user,
+                                   recipe=get_recipe).exists():
             msg = 'Рецепт уже добавлен в избранное'
             return Response(msg, status=HTTPStatus.BAD_REQUEST)
         Favorite.objects.create(user=request.user, recipe=get_recipe)
@@ -173,8 +170,7 @@ class FavouriteViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     def delete(self, request, *args, **kwargs):
         user_id = request.user.id
         recipe_id = self.kwargs['id']
-        get_object_or_404(
-                          Favorite, user__id=user_id,
+        get_object_or_404(Favorite, user__id=user_id,
                           recipe__id=recipe_id).delete()
         msg = 'Рецепт успешно удалён из списка избранного'
         return Response(msg)
@@ -189,9 +185,8 @@ class ShoppingCartViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     def create(self, request, *args, **kwargs):
         id = self.kwargs.get('id')
         get_recipe = get_object_or_404(Recipe, id=id)
-        if ShoppingCart.objects.filter(
-                                        buyer=request.user,
-                                        recipe=get_recipe).exists():
+        if ShoppingCart.objects.filter(buyer=request.user,
+                                       recipe=get_recipe).exists():
             msg = 'Рецепт уже добавлен в список покупок'
             return Response(msg, status=HTTPStatus.BAD_REQUEST)
         ShoppingCart.objects.create(buyer=request.user, recipe=get_recipe)
@@ -201,8 +196,7 @@ class ShoppingCartViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     def delete(self, request, *args, **kwargs):
         buyer_id = request.user.id
         recipe_id = self.kwargs['id']
-        get_object_or_404(
-                          ShoppingCart, buyer__id=buyer_id,
+        get_object_or_404(ShoppingCart, buyer__id=buyer_id,
                           recipe__id=recipe_id).delete()
         msg = 'Рецепт успешно удалён из списка покупок'
         return Response(msg)
@@ -229,8 +223,7 @@ class ShoppingCartLoadlist(APIView):
                     else:
                         s_voc[name] = {
                             'measurement_unit': measurement_unit,
-                            'amount': amount
-                            }
+                            'amount': amount}
             shopping_list = list()
             for value in s_voc:
                 shopping_list.append(f'{value}-{s_voc[value]["amount"]}'
