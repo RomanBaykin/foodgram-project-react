@@ -97,8 +97,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
                 'id': ingredient.id,
                 'name': ingredient.name,
                 'measurement_unit': ingredient.measurement_unit,
-                'amount': amount[i].amount
-                }
+                'amount': amount[i].amount}
             amount_list.append(i)
         representation['ingredients'] = amount_list
         return representation
