@@ -38,6 +38,10 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
+    depends_on:
+      - web
+    env_file:
+      - ./.env
 
 volumes:
   static_value:
