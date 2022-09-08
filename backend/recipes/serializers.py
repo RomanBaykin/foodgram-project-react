@@ -130,7 +130,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author_id=obj.id).order_by('pub_date')
         if recipe_limit is not None:
             queryset = Recipe.objects.filter(
-                author_id=obj.id)[:int(recipe_limit)].order_by('pub_date')
+                author_id=obj.id)[:int(recipe_limit)]
         return RecipePostSerializer(queryset, many=True).data
       
     def get_recipe_count(self, obj):
