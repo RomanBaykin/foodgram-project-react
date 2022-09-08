@@ -61,6 +61,22 @@ class RecipePostSerializer(serializers.ModelSerializer):
                   'tags', 'ingredients', 'cooking_time', 'is_favorited',
                   'is_in_shopping_cart')
 
+    def get_is_favorited(self, obj):
+        """проверка наличия рецепта в избранном"""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return Favorite.objects.filter(
+            user=request.user, recipe__id=obj.id).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        """проверка наличия рецепта в корзине"""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            buyer=request.user, recipe__id=obj.id).exists()
+
     def validate_ingredients(self, attrs):
         ingredients = attrs
         ingredients_in_recipe = []
@@ -102,42 +118,19 @@ class RecipePostSerializer(serializers.ModelSerializer):
         representation['ingredients'] = amount_list
         return representation
 
-    def get_is_favorited(self, obj):
-        """проверка наличия рецепта в избранном"""
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Favorite.objects.filter(user=request.user, recipe=obj).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        """проверка наличия рецепта в корзине"""
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            buyer=request.user, recipe=obj).exists()
-
-
-class RecipeCountSerializer(serializers.ModelSerializer):
-    recipe_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Recipe
-        fields = ('recipe_count',)
-
-    def get_recipe_count(self, obj):
-        return Recipe.objects.filter(author__id=obj.id).count()
-
 
 class SubscribeSerializer(serializers.ModelSerializer):
     recipes = serializers.SerializerMethodField()
-    recipe_count = RecipeCountSerializer(read_only=True)
+    recipe_count = serializers.SerializerMethodField(read_only=True)
     username = serializers.CharField(required=False)
 
     def get_recipes(self, obj):
         selected_recipes = Recipe.objects.filter(
             author_id=obj.id).order_by('pub_date')
         return RecipePostSerializer(selected_recipes, many=True).data
+
+    def get_recipe_count(self, obj):
+        return Recipe.objects.filter(author__id=obj.id).count()
 
     class Meta:
         fields = ('email', 'id', 'username', 'first_name',
