@@ -1,1 +1,5 @@
-[# praktikum_new_diplom](https://github.com/<OWNER>/<REPOSITORY>/actions/workflows/<WORKFLOW_FILE>/badge.svg)
+[# praktikum_new_diplom](https://github.com/RomanBaykin/foodgram-project-react/actions/workflows/main.yaml/badge.svg)
+
+server IP: 51.250.109.66
+login: Soulafein87
+pass: test
