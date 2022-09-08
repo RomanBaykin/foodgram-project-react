@@ -125,10 +125,14 @@ class SubscribeSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)
 
     def get_recipes(self, obj):
-        selected_recipes = Recipe.objects.filter(
-            author_id=obj.id).order_by('pub_date')
-        return RecipePostSerializer(selected_recipes, many=True).data
-
+        request = self.context.get('request')
+        recipe_limit = request.GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author_id=obj.id).order_by('pub_date')
+        if recipe_limit is not None:
+            queryset = Recipe.objects.filter(
+                author_id=obj.id)[:int(recipe_limit)].order_by('pub_date')
+        return RecipePostSerializer(queryset, many=True).data
+      
     def get_recipe_count(self, obj):
         return Recipe.objects.filter(author__id=obj.id).count()
 
