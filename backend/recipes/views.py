@@ -74,22 +74,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = RecipePostSerializer(instance=recipe)
         return Response(serializer.data, status=HTTPStatus.CREATED)
 
-    def partial_update(self, request, pk=None):
+def partial_update(self, request, pk=None):
         instance = get_object_or_404(Recipe, pk=pk)
+        instance.tags.clear()
+        RecipeIngredients.objects.filter(recipe=instance).delete()
         serializer = RecipePostSerializer(
             instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         instance.id = serializer.validated_data.get('id', instance.id)
         tags = serializer.validated_data.pop('tags')
-        instance.tags.clear()
         ingredients = serializer.validated_data.pop('recipeingredients')
         instance.name = serializer.validated_data.get('name', instance.id)
-        instance.image = serializer.validated_data.pop(
-            'image', instance.id)
         instance.text = serializer.validated_data.get('text', instance.id)
         instance.cooking_time = serializer.validated_data.get(
             'cooking_time', instance.id)
-        RecipeIngredients.objects.filter(recipe=instance).delete()
+        instance.image = serializer.validated_data.get('image', instance.id)
         for value in tags:
             tags_id = value.id
             instance.tags.add(get_object_or_404(Tags, pk=tags_id))
@@ -101,6 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingredients = Ingredients.objects.get(
                 id=value['ingredients'].get('id'))
             instance.ingredients.add(ingredients)
+        instance.save()
         serializer = RecipePostSerializer(instance)
         return Response(serializer.data, status=HTTPStatus.CREATED)
 
