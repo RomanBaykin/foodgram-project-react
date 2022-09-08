@@ -7,26 +7,13 @@ services:
       - postgres_value:/var/lib/postgresql/data/
     env_file:
       - ./.env
-
-  web:
-    image: soulafein/backend:v1.02
-    restart: always 
-    command: >
-      sh -c "python manage.py collectstatic --noinput &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - static_value:/app/static/
-      - media_value:/app/media/
-    depends_on:
-      - db
-    env_file:
-      - ./.env
-  
+    
   frontend:
     image: soulafein/frontend:v1.01
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - web
 
   nginx:
     image: nginx:1.19.3
@@ -40,6 +27,21 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - web
+    env_file:
+      - ./.env
+
+  web:
+    image: soulafein/backend:v1.02
+    restart: always 
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+    depends_on:
+      - db
     env_file:
       - ./.env
 
