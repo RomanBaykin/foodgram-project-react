@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -13,7 +13,8 @@ from rest_framework.views import APIView
 from recipes.models import (Favorite, Ingredients, Recipe, RecipeIngredients,
                             ShoppingCart, Subscribes, Tags)
 
-from .filters import CustomFilter
+from .filters import CustomFilter, IngredientsCustomFilter
+from .pagination import LimitPagination
 from .permissions import OwnerAdminReadOnly
 from .serializers import (IngredientsSerializer, RecipePostSerializer,
                           ShoppingCartAndFavouriteSerializer,
@@ -33,7 +34,7 @@ class TagsViewSet(mixins.RetrieveModelMixin,
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipePostSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
     permission_classes = [OwnerAdminReadOnly]
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = CustomFilter
@@ -117,7 +118,7 @@ class IngredientsGetList(viewsets.ReadOnlyModelViewSet):
 class SubscribesViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = SubscribeSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
