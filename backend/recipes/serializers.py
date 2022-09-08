@@ -132,7 +132,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
             queryset = Recipe.objects.filter(
                 author_id=obj.id)[:int(recipe_limit)]
         return RecipePostSerializer(queryset, many=True).data
-      
+
     def get_recipe_count(self, obj):
         return Recipe.objects.filter(author__id=obj.id).count()
 
