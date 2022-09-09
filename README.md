@@ -22,7 +22,7 @@ Gunicorn,
 Яндекс.облако
 
 <div id="header" align="center">
-  <img src="https://media.giphy.com/media/elrFAUtV7ZOH7TSPhF/giphy-downsized-large.gif"/>
+  <img src="https://media.giphy.com/media/z2KbVZxKCHxxIDhnsQ/giphy.gif" width="100"/>
 </div>
 
 
